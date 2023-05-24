@@ -35,6 +35,16 @@ k = lambda S1,S2 : fn.k1(S1,S2)
 m = lambda X1,X2 : fn.m1(X1,X2,1)
 
 
+
+#plot parameters
+
+plot_every_hist = True
+plot_hist_lambda_opt_for_loss = True
+plot_loss_over_gamma_lambda_opt = True
+plot_HSIC_over_gamma_lambda_opt = True
+
+
+
 ####### Generation and plot of the training data
 
 #generation
@@ -133,22 +143,69 @@ HSIC = ac.HSIC_f(Pred,B,n_test,Gamma,Lambda)
 
 ##### Plots of the predictions
 
-fig, axs = plt.subplots(len(Lambda), len(Gamma), figsize=(20,20))
-for i in range(len(Lambda)):
+#plot of all the histograms of the grid search
+
+
+if plot_every_hist :
+    fig, axs = plt.subplots(len(Lambda), len(Gamma), figsize=(20,20))
+    for i in range(len(Lambda)):
+        for j in range(len(Gamma)):
+            Y_0_pred = [Pred[i][j][k]  for k in range(n_test) if S_test[k] == 0]
+            Y_1_pred = [Pred[i][j][k]  for k in range(n_test) if S_test[k] == 1]
+            axs[i,j].hist(Y_0_pred,color ="red",bins=60,label = "S = 0")
+            axs[i,j].hist(Y_1_pred,color ="blue",bins=60,label = "S = 1")
+            axs[i,j].plot([np.mean(Y_0_pred),np.mean(Y_0_pred)],[0,n_test/20],"black")
+            axs[i,j].plot([np.mean(Y_1_pred),np.mean(Y_1_pred)],[0,n_test/20],"black")
+            axs[i,j].legend()
+            axs[i,j].set_title(r"$\lambda = $" + str(Lambda[i]) + r"$\gamma = $" + str(Gamma[j]))
+            axs[i,j].axis([np.min(Y_test),np.max(Y_train),0,n_test/20])
+            #print(4*i + j)
+
+    fig.suptitle('Repartition of the predictions for s=0 and s=1')
+
+    plt.show()
+  
+    
+#plot the histograms for differents values of gamma of the repartition of the labels for the optimal value of lambda in term of loss
+Ind_l = [np.argmin(Loss[:,j]) for j in range(len(Gamma))]
+
+if plot_hist_lambda_opt_for_loss :
+    fig, axs = plt.subplots(len(Gamma)//4 , 4, figsize=(25,8))
     for j in range(len(Gamma)):
+        i = Ind_l[j]
         Y_0_pred = [Pred[i][j][k]  for k in range(n_test) if S_test[k] == 0]
         Y_1_pred = [Pred[i][j][k]  for k in range(n_test) if S_test[k] == 1]
-        axs[i,j].hist(Y_0_pred,color ="red",bins=60,label = "S = 0")
-        axs[i,j].hist(Y_1_pred,color ="blue",bins=60,label = "S = 1")
-        #axs[i,j].plot([np.mean(Y_0_pred),np.mean(Y_0_pred)],[0,n_test/20],"black")
-        #axs[i,j].plot([np.mean(Y_1_pred),np.mean(Y_1_pred)],[0,n_test/20],"black")
-        axs[i,j].legend()
-        axs[i,j].set_title(r"$\lambda = $" + str(Lambda[i]) + r"$\gamma = $" + str(Gamma[j]))
-        axs[i,j].axis([np.min(Y_test),np.max(Y_train),0,n_test/20])
-        #print(4*i + j)
+        a = j//4
+        b = j%4
+        axs[a,b].hist(Y_0_pred,color ="red",bins=60,label = "S = 0")
+        axs[a,b].hist(Y_1_pred,color ="blue",bins=60,label = "S = 1")
+        axs[a,b].plot([np.mean(Y_0_pred),np.mean(Y_0_pred)],[0,20],"black")
+        axs[a,b].plot([np.mean(Y_1_pred),np.mean(Y_1_pred)],[0,20],"black")
+        axs[a,b].legend()
+        axs[a,b].set_title(r"$\gamma = $" + str(Gamma[j]) + r" $\lambda_{opt} = $  " +  str(Lambda[Ind_l[j]]))
+        axs[a,b].axis([-10,10,0,20])
+    
+    fig.suptitle(r'Repartition of the predictions for s=0 and s=1 for fifferent values of $\gamma$ and optimal $\lambda$')
+    
+    plt.show()    
+    
+#Plot of the loss over gamma with opt lambda
+if plot_loss_over_gamma_lambda_opt:
+    plt.figure(figsize=(20,7))
+    plt.plot(Gamma, [Loss[j, Ind_l[j]] for j in range(len(Gamma))])
+    plt.scatter(Gamma, [Loss[j, Ind_l[j]] for j in range(len(Gamma))])
+    plt.xlabel(r"$\gamma$")
+    plt.ylabel("Loss")
+    plt.title(r"Evolution of the Loss with $\gamma$ for an optimal $\lambda_{\gamma}$")
 
-fig.suptitle('Repartition of the predictions for s=0 and s=1')
+    
 
-plt.show()
-
+#Plot of HSIC over gamma with opt lambda
+if plot_HSIC_over_gamma_lambda_opt:
+    plt.figure(figsize=(20,7))
+    plt.plot(Gamma, [HSIC[j, Ind_l[j]] for j in range(len(Gamma))])
+    plt.scatter(Gamma, [HSIC[j, Ind_l[j]] for j in range(len(Gamma))])
+    plt.xlabel(r"$\gamma$")
+    plt.ylabel("HSIC")
+    plt.title(r"Evolution of the HSIC with $\gamma$ for an optimal $\lambda_{\gamma}$")
 
