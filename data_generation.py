@@ -16,7 +16,10 @@ def gen_Y(X,S,f_star,sigma,n):
     
     
     
-    
-    
+def shape_S(S):
+    if len(S.shape) == 1:
+        return 1
+    else:
+        return len(S[0])
 
     
