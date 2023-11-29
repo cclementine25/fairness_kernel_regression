@@ -8,9 +8,9 @@ import scipy.stats as scs
 mu_0 = 2*np.array([-1,-1])#3*np.random.randn(2) 
 mu_2 = 2*np.array([1,1])#3*np.random.randn(2) 
 mu_1 = np.array([0,0])
-L0 = 0.2 * np.array([[ 1.26549968,  0.21514026],
+L1 = 0.2 * np.array([[ 1.26549968,  0.21514026],
        [-0.17581564, -0.59862356]])
-L1 = 0.5 * np.array([[-2.01894502, -0.60109417],
+L0 = 0.4 * np.array([[-2.01894502, -0.60109417],
        [-1.30296682, -0.27193436]])
 L2 = np.array([[-0.59893527,  0.4090206 ],
        [ 0.2676863 , -0.49630348]])
@@ -119,11 +119,13 @@ def f_star2(x,B,w):
     return np.dot(x,B @ x) + np.dot(x,w)
 
 def f_star3(x,w):
-    return x[0] + x[1]
+    return np.exp(np.dot(x,w))
 
 def f_star4(x,s,w):
     return np.cos(np.dot(x,w)) + 3 * s
 
+def f_star5(X,S,w):
+    return np.dot(w,X)
 
 
 
